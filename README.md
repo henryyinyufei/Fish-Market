@@ -9,7 +9,6 @@ The goal for this project is to predict weight for each Species using **Linear R
 ---
 
 ## Linear Regression Analysis
-
 Weight vs. Height
 ![Weight-Height](https://raw.githubusercontent.com/henryyinyufei/fish-market/main/image/Weight-Height.png)
 
