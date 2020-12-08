@@ -6,6 +6,8 @@ The goal for this project is to predict weight for each Species using **Linear R
 
 ![Species](https://raw.githubusercontent.com/henryyinyufei/fish-market/main/image/Species-Bar-Chart.png)
 
+[fish dataset](https://github.com/henryyinyufei/fish-market/blob/main/Fish.csv)
+
 ---
 
 ## Linear Regression Analysis
