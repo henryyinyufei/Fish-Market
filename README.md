@@ -38,7 +38,10 @@ Data Splitting
 
 Here is my report about it : ***[Fish Market Analysis](https://github.com/henryyinyufei/fish-market/blob/main/Fish-Market-Analysis.pdf)***
 
+---
+
 ## Rmarkdown
 [Here is the Rmarkdown code](https://github.com/henryyinyufei/fish-market/blob/main/Rmarkdown%20files/Fish%20Market%20Code.Rmd)
 
 ## Images
+[Here is the image outputs](https://github.com/henryyinyufei/fish-market/tree/main/image)
