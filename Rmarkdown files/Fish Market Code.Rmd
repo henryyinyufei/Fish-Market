@@ -216,7 +216,8 @@ which(abs(rstandard(loglog.mdl)) >3 )
 sort(cooks.distance(loglog.mdl), decreasing = TRUE)
 fish_without159 <- filter(fish, Observations != 159)
 loglog.mdl_without159 <-lm(data = fish_without159, 
-                           log(Weight) ~ Species*log(Vlength) + Species*log(Dlength) + Species*log(Clength) +                                       Species*log(Height) + Species*log(Width))
+                           log(Weight) ~ Species*log(Vlength) + Species*log(Dlength) + Species*log(Clength) + 
+                           Species*log(Height) + Species*log(Width))
 coef(loglog.mdl)
 coef(loglog.mdl_without159)
 
