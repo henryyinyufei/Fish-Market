@@ -6,4 +6,17 @@ The goal for this project is to predict weight for each Species using **Linear R
 
 ![Species](https://raw.githubusercontent.com/henryyinyufei/fish-market/main/image/Species-Bar-Chart.png)
 
+---
 
+## Linear Regression Analysis
+
+Weight vs. Height
+![Weight-Height](https://raw.githubusercontent.com/henryyinyufei/fish-market/main/image/Weight-Height.png)
+
+![LogLog](https://raw.githubusercontent.com/henryyinyufei/fish-market/main/image/logweight-logheight.png)
+
+![Residual-Plots](https://raw.githubusercontent.com/henryyinyufei/fish-market/main/image/residual-plot-after-transformation2.png)
+
+![validation](https://raw.githubusercontent.com/henryyinyufei/fish-market/main/image/Cross-Validation.png)
+
+Here is my report about it : ***[Fish Market Analysis](https://github.com/henryyinyufei/fish-market/blob/main/Fish-Market-Analysis.pdf)***
