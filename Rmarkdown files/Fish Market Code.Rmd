@@ -1,0 +1,372 @@
+---
+title: "Fish Market Code"
+author: "Yufei Yin"
+linestretch: 1.5
+output: pdf_document
+---
+
+# Load Package
+```{r, warning = FALSE, message = FALSE}
+library(tidyverse)
+library(leaps)
+library(caret)
+library(car)
+```
+
+
+# Load Dataset
+```{r}
+fish <- read_csv("fish.csv")
+head(fish)
+```
+
+
+# Check Missing Value
+```{r}
+any(is.na(fish))
+```
+
+
+# Extra point (outlier)
+```{r}
+extrapoint <- tibble(Species = "Bream", Length1 = 20, Length2 = 10, Length3 = 30, Height = 15, Width = 5, Weight = 10)
+fish <- bind_rows(fish, extrapoint)
+```
+
+
+# Data Cleaning
+```{r}
+fish <- fish %>% 
+  filter(Weight != 0) %>%                        # Observation 41 has weight 0
+  mutate(Observations = row_number()) %>% 
+  mutate(Species = factor(Species)) %>% 
+  rename(Vlength = Length1) %>%                  # Vertical Length
+  rename(Dlength = Length2) %>%                  # Diagonal Length
+  rename(Clength = Length3) %>%                  # Cross Length
+  select(Observations, Species, Vlength, Dlength, Clength, Height, Width, Weight)
+```
+
+Observation 41 has weight 0 which is not reasonable, so we drop this observation.                                         
+Change variable Species to factor                                                                                         
+Create a new variable Observations contain the observation number.                                                                          
+Length1, Length2, Length3 stand for Vertical Length, Diagonal Length, and Cross Length, So we change the variable name to Vlength, Dlength, and Clength which makes more sense.                                                                     
+Finally we sort our data.
+
+
+# Pair Plot
+```{r}
+pairs(fish[3:8])
+```
+
+
+# Weight vs. Vertical Length
+```{r}
+ggplot(data = fish, aes(x = Vlength, y = Weight, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "Vertical Length", title = "Weight vs. Vertical Length")
+```
+
+
+# Weight vs. Diagonal Length
+```{r}
+ggplot(data = fish, aes(x = Dlength, y = Weight, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "Diagonal Length", title = "Weight vs. Diagonal Length")
+```
+
+
+# Weight vs. Cross Length
+```{r}
+ggplot(data = fish, aes(x = Clength, y = Weight, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "Cross Length", title = "Weight vs. Cross Length")
+```
+
+
+# Weight vs. Height
+```{r}
+ggplot(data = fish, aes(x = Height, y = Weight, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(title = "Weight vs. Height")
+```
+
+
+# Weight vs. Width
+```{r}
+ggplot(data = fish, aes(x = Width, y = Weight, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(title = "Weight vs. Width")
+```
+
+
+# Multicollinearity
+```{r}
+cor(fish[3:8])
+ggplot(data = fish, aes(x = Vlength, y = Dlength, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "Vertical Length", y = "Diagonal Length", title = "Diagonal Length vs. Vertical Length")
+ggplot(data = fish, aes(x = Vlength, y = Clength, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "Vertical Length", y = "Cross Length", title = "Cross Length vs. Vertical Length")
+ggplot(data = fish, aes(x = Vlength, y = Height, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "Vertical Length", title = "Height vs. Vertical Length")
+ggplot(data = fish, aes(x = Vlength, y = Width, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "Vertical Length", title = "Width vs. Vertical Length")
+ggplot(data = fish, aes(x = Dlength, y = Clength, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "Diagonal Length", y = "Cross Length", title = "Cross Length vs. Diagonal Length")
+ggplot(data = fish, aes(x = Dlength, y = Height, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "Diagonal Length", title = "Height vs. Diagonal Length")
+ggplot(data = fish, aes(x = Dlength, y = Width, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "Diagonal Length", title = "Width vs. Diagonal Length")
+ggplot(data = fish, aes(x = Clength, y = Height, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "Cross Length", title = "Height vs. Cross Length")
+ggplot(data = fish, aes(x = Clength, y = Width, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "Cross Length", title = "Width vs. Cross Length")
+ggplot(data = fish, aes(x = Height, y = Width, color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(title = "Width vs. Height")
+```
+
+
+# Full Model
+```{r}
+full.mdl <- lm(data = fish, 
+               Weight ~ Species*Vlength + Species*Dlength + Species*Clength + Species*Height + Species*Width)
+summary(full.mdl)
+```
+
+
+# Residual Analysis
+```{r, warning=FALSE, message=FALSE}
+par(mfrow = c(2,2))
+plot(full.mdl)
+```
+
+
+# Transformation
+```{r}
+ggplot(data = fish, aes(x = log(Vlength), y = log(Weight), color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "log Vertical Length", title = "log Weight vs. log Vertical Length")
+```
+```{r}
+ggplot(data = fish, aes(x = log(Dlength), y = log(Weight), color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "log Diagonal Length", title = "log Weight vs. log Diagonal Length")
+```
+```{r}
+ggplot(data = fish, aes(x = log(Clength), y = log(Weight), color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(x = "log Cross Length", title = "log Weight vs. log Cross Length")
+```
+```{r}
+ggplot(data = fish, aes(x = log(Height), y = log(Weight), color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(title = "log Weight vs. log Height")
+```
+```{r}
+ggplot(data = fish, aes(x = log(Width), y = log(Weight), color = Species)) + 
+  geom_point(size = 3, alpha = 0.5) +
+  labs(title = "log Weight vs. log Width")
+```
+
+
+# Model After Transformation
+```{r}
+loglog.mdl <- lm(data = fish, 
+                 log(Weight) ~ Species*log(Vlength) + Species*log(Dlength) + Species*log(Clength) + 
+                   Species*log(Height) + Species*log(Width))
+summary(loglog.mdl)
+```
+
+
+# Residual Analysis After Transformation
+```{r, warning=FALSE, message=FALSE}
+par(mfrow = c(2,2))
+plot(loglog.mdl)
+```
+
+
+# high leverage points
+```{r, warning = FALSE, message = FALSE}
+# X matrix 
+attach(fish)
+X <- cbind(rep(1,158), log(Vlength), log(Dlength), log(Clength), log(Height), log(Width))
+# Hat matrix
+H <- X %*% solve(t(X) %*% X) %*% t(X)
+# hii
+hii <- diag(H)
+# Identify points of high Leverage
+p<-ncol(X)
+n<-nrow(X)
+which(hii>2*p/n)
+which(abs(rstandard(loglog.mdl)) >3 )
+```
+
+
+# outliers
+```{r}
+sort(cooks.distance(loglog.mdl), decreasing = TRUE)
+fish_without159 <- filter(fish, Observations != 159)
+loglog.mdl_without159 <-lm(data = fish_without159, 
+                           log(Weight) ~ Species*log(Vlength) + Species*log(Dlength) + Species*log(Clength) +
+                             Species*log(Height) + Species*log(Width))
+              
+coef(loglog.mdl)
+coef(loglog.mdl_without159)
+
+# Remove outliers 
+fish <- filter(fish, Observations != 159)
+```
+
+
+
+
+# Model Selection
+```{r}
+loglog.mdl <- lm(data = fish, 
+                 log(Weight) ~ Species*log(Vlength) + Species*log(Dlength) + Species*log(Clength) + 
+                   Species*log(Height) + Species*log(Width))
+step(loglog.mdl, direction = "both")
+```
+
+
+```{r}
+loglog.mdl <- lm(data = fish, log(Weight) ~ Species + log(Clength) + log(Height) + log(Width))
+summary(loglog.mdl)
+```
+
+
+# Further Analysis after Model Selection
+```{r}
+# Multicollinearity
+loglog.mdl <- lm(data = fish, log(Weight) ~ Species + log(Clength) + log(Height) + log(Width))
+vif(loglog.mdl)
+par(mfrow = c(2,2))
+plot(loglog.mdl)
+
+# Refit Without variable Height
+loglog.mdl <- lm(data = fish, log(Weight) ~ Species + log(Clength) + log(Width))
+vif(loglog.mdl)
+plot(loglog.mdl)
+
+# Check high standardized residual point 14
+fish_without14 <- fish[-14,]
+loglog.mdl_without14 <- lm(data = fish_without14, log(Weight) ~ Species + log(Clength) + log(Width))
+coef(loglog.mdl)
+coef(loglog.mdl_without14)
+
+# final model
+final_mdl <- lm(data = fish, log(Weight) ~ Species + log(Clength) + log(Width))
+summary(final_mdl)
+```
+
+
+
+# Cross Validation
+```{r}
+set.seed(10086)
+for (i in 1:5){
+nsamp <- ceiling(0.8*length(fish$Weight))
+training_samps <- sample(c(1:length(fish$Weight)),nsamp)
+train_data  <- fish[training_samps, ]
+test_data <-   fish[-training_samps, ]
+train.lm <- lm(data = train_data, log(Weight) ~ Species + log(Clength)  + log(Width))
+summary(train.lm)
+preds <- exp(predict(train.lm,test_data))
+plot(test_data$Weight, preds,
+     xlab = "Weight", ylab = "Predicted Weight", main = "Predicted Weight vs. Actual Weight")
+abline(c(0,1))
+R.sq <- R2(preds, test_data$Weight)
+RMSPE <- RMSE(preds, test_data$Weight)
+MAPE <- MAE(preds, test_data$Weight)
+print(c(i,R.sq,RMSPE,MAPE))
+}
+```
+
+```{r}
+point.data <- tibble(preds, test_data$Weight)
+ggplot(data = point.data, aes(x = test_data$Weight, y = preds)) + 
+  geom_point(color = "blue") +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  labs(x = "Weight", y = "Predicted Weight", title = "Predicted Weight vs. Actual Weight")
+```
+
+```{r}
+fish %>% group_by(Species) %>% count()
+ggplot(data = fish, aes(x = fct_infreq(Species), color = Species, fill = Species)) + 
+  geom_bar() +
+  labs(x = "Species", title = "Species Bar Chart")
+```
+
+```{r, warning=FALSE,message=FALSE}
+Whitefish <- filter(fish, Species %in% "Whitefish")
+ggplot(data = Whitefish, aes(x = Width, y = Weight)) + 
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Weight vs. Width Whitefish")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
