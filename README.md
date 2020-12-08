@@ -1,4 +1,4 @@
-# fish-market
+# Fish-Market
 
 STAT 350 Linear Regression Final Project
 
